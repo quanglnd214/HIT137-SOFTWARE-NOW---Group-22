@@ -1,0 +1,17 @@
+"""
+ASSIGNMENT 2
+GROUP NAME: DAN/EXT 22
+GROUP MEMBER:
+Nguyen Duy Quang Lai        -   s389980
+Angel Chang                 -   s377501
+Nicole Suzanne Sattler      -   s195029
+Youssef Elkassaby           -   s392402
+============================================================================
+Question 2
+Create a program that analyses temperature data collected from multiple weather 
+stations in Australia. The data is stored in multiple CSV files under a "temperatures" 
+folder, with each file representing data from one year. Process ALL .csv files in the 
+temperatures folder. Ignore missing temperature values (NaN) in calculations.
+"""
+
+import csv
