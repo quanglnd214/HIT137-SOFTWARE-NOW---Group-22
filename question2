@@ -15,3 +15,24 @@ temperatures folder. Ignore missing temperature values (NaN) in calculations.
 """
 
 import csv
+import glob
+import os
+import statistics
+
+def analyze_weather_data():
+    # Display a message to indicate the program has started
+    print("--- Starting Weather Data Analysis ---")
+    
+    # Define the folder that contains the CSV files
+    folder_path = "temperatures"
+    
+    # Create a file pattern to match all required CSV files
+    file_pattern = os.path.join(folder_path, "stations_group_*.csv")
+    
+    # Get a list of all matching CSV files
+    csv_files = glob.glob(file_pattern)
+    
+    # If no CSV files are found, stop the program
+    if not csv_files:
+        print("Error: No CSV files found in the temperatures folder.")
+        return
