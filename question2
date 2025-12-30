@@ -36,3 +36,55 @@ def analyze_weather_data():
     if not csv_files:
         print("Error: No CSV files found in the temperatures folder.")
         return
+    # Define Australian seasons and their corresponding months
+    seasons_map = {
+        'Summer': ['December', 'January', 'February'],
+        'Autumn': ['March', 'April', 'May'],
+        'Winter': ['June', 'July', 'August'],
+        'Spring': ['September', 'October', 'November']
+    }
+
+    # Dictionary to store temperatures for each season
+    season_temps = {season: [] for season in seasons_map}
+    
+    # Dictionary to store all temperatures for each station
+    station_data = {}
+
+    print(f"Processing {len(csv_files)} files...")
+
+    # Loop through each CSV file
+    for filename in csv_files:
+        # Open the CSV file
+        with open(filename, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            
+            # Remove extra spaces from column headers
+            reader.fieldnames = [name.strip() for name in reader.fieldnames]
+
+            # Read each row of the CSV file
+            for row in reader:
+                # Get the station name
+                station_name = row.get('STATION_NAME')
+                
+                # Skip rows without a station name
+                if not station_name:
+                    continue
+
+                # Create a new list for the station if it doesn't exist
+                if station_name not in station_data:
+                    station_data[station_name] = []
+
+                # Loop through each season and its months
+                for season, months in seasons_map.items():
+                    for month in months:
+                        temp_str = row.get(month)
+
+                        # Ignore missing or invalid temperature values
+                        if temp_str and temp_str.strip().lower() not in ['nan', '', 'null']:
+                            temp = float(temp_str)
+
+                            # Add temperature to seasonal data
+                            season_temps[season].append(temp)
+                            
+                            # Add temperature to station-specific data
+                            station_data[station_name].append(temp)
