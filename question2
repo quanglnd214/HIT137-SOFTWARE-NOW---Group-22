@@ -88,3 +88,73 @@ def analyze_weather_data():
                             
                             # Add temperature to station-specific data
                             station_data[station_name].append(temp)
+
+    # TASK 1: SEASONAL AVERAGES
+    
+    with open("average_temp.txt", "w") as f:
+        for season in ['Summer', 'Autumn', 'Winter', 'Spring']:
+            temps = season_temps[season]
+            if temps:
+                average = sum(temps) / len(temps)
+                f.write(f"{season}: {average:.1f}°C\n")
+
+    print("Generated: average_temp.txt")
+
+    
+    # PREPARE STATION STATISTICS
+    
+    station_stats = []
+
+    # Calculate statistics for each station
+    for station, temps in station_data.items():
+        if temps:
+            maximum = max(temps)
+            minimum = min(temps)
+            temp_range = maximum - minimum
+            std_dev = statistics.stdev(temps) if len(temps) > 1 else 0.0
+
+            station_stats.append({
+                'name': station,
+                'range': temp_range,
+                'max': maximum,
+                'min': minimum,
+                'std': std_dev
+            })
+
+    
+    # TASK 2: LARGEST TEMPERATURE RANGE
+    
+    max_range = max(s['range'] for s in station_stats)
+
+    with open("largest_temp_range_station.txt", "w") as f:
+        for s in station_stats:
+            if s['range'] == max_range:
+                f.write(
+                    f"Station {s['name']}: "
+                    f"Range {s['range']:.1f}°C "
+                    f"(Max: {s['max']:.1f}°C, Min: {s['min']:.1f}°C)\n"
+                )
+
+    print("Generated: largest_temp_range_station.txt")
+
+    
+    # TASK 3: TEMPERATURE STABILITY
+    
+    min_std = min(s['std'] for s in station_stats)
+    max_std = max(s['std'] for s in station_stats)
+
+    with open("temperature_stability_stations.txt", "w") as f:
+        for s in station_stats:
+            if s['std'] == min_std:
+                f.write(f"Most Stable: Station {s['name']}: StdDev {s['std']:.1f}°C\n")
+        for s in station_stats:
+            if s['std'] == max_std:
+                f.write(f"Most Variable: Station {s['name']}: StdDev {s['std']:.1f}°C\n")
+
+    print("Generated: temperature_stability_stations.txt")
+    print("--- Analysis Complete ---")
+
+# Run the program
+if __name__ == "__main__":
+    analyze_weather_data()
+
