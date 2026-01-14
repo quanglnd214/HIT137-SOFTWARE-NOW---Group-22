@@ -16,8 +16,8 @@ verify the decryption was successful.
 
 def shift_char(char, shift):
     """
-    Helper function to shift a single character within its alphabet range.
-    Uses modulo arithmetic (%) to wrap around from 'z' to 'a' or 'Z' to 'A'.
+    Centralizes character shifting logic so encryption and decryption
+    remain consistent and easy to reverse.
     """
     if char.islower():
         base = ord('a')
@@ -35,10 +35,8 @@ def shift_char(char, shift):
 
 def encrypt_text(text, shift1, shift2):
     """
-    Applies the specific encryption rules from the assignment to a string.
-    Returns:
-      1. The encrypted string
-      2. A 'shift_log' list (records the exact shift used for each char to help decryption)
+    Applies assignment-specific encryption rules and records the exact
+    shift used for each character so decryption can be guaranteed.
     """
     encrypted = []
     shift_log = []
@@ -177,4 +175,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
