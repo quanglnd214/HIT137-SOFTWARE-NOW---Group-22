@@ -13,4 +13,14 @@ class HistoryManager:
     - keeping track of past image states
     - putting states back in place when you undo or redo actions
     """
-    pass
+    def push(self, state) -> None:
+        pass
+
+    def undo(self, current_state):
+        pass
+
+    def redo(self, current_state):
+        pass
+
+    def clear(self) -> None:
+        pass

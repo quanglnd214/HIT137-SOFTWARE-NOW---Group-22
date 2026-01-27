@@ -12,4 +12,17 @@ class ImageModel:
     - Keep track of the file location and the "dirty" status (changes that haven't been saved).
     - Give minor utility methods to keep the GUI code clean.
     """
-    pass
+    def has_image(self) -> bool:
+        pass
+
+    def set_image(self, image, path=None) -> None:
+        pass
+
+    def apply_new_current(self, image) -> None:
+        pass
+
+    def mark_saved(self, path=None) -> None:
+        pass
+
+    def get_dimensions(self):
+        pass
