@@ -106,8 +106,40 @@ class EditorApp:
 
     # Logic stubs below allow Members 1 and 3 to implement their 
     # logic without breaking the main UI thread.
-    def save_file(self): pass
-    def save_as_file(self): pass
+    def save_file(self): 
+         """
+    Saves the current image to disk. 
+    If no file path exists, delegates to save_as_file().
+        """
+        if self.current_file_path is None:
+        self.save_as_file()
+        else:
+        # self.model.save(self.current_file_path)
+        self.unsaved_changes = False
+        self.status_text.set(f"Saved: {self.current_file_path}")
+
+    def save_as_file(self): 
+        """
+    Prompts the user to choose a file name and location, 
+    then updates the app state after saving the image.
+    Cancels gracefully if the user closes the dialog.
+    """
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".png",
+        filetypes=[
+            ("PNG files", "*.png"),
+            ("JPEG files", "*.jpg"),
+            ("All files", "*.*")
+        ]
+    )
+
+        if not file_path:
+            return  # User cancelled
+
+    # Later: self.model.save(file_path)
+        self.current_file_path = file_path
+        self.unsaved_changes = False
+        self.status_text.set(f"Saved as: {file_path}")
     def undo_action(self): pass
     def redo_action(self): pass
 
