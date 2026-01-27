@@ -3,9 +3,9 @@ from tkinter import filedialog, messagebox
 
 # We split the logic into separate modules to meet the HD requirement for 
 # code structure and readability by avoiding a single massive file.
-from image_model import ImageModel
-from history import HistoryManager
-from image_processor import ImageProcessor
+from core.image_model import ImageModel
+from core.history import HistoryManager
+from core.image_processor import ImageProcessor
 
 class EditorApp:
     """
