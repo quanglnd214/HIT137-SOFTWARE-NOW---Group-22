@@ -1,11 +1,15 @@
 import tkinter as tk
+from pathlib import Path
 from tkinter import filedialog, messagebox
 
-# We split the logic into separate modules to meet the HD requirement for 
+import cv2
+
+from core.history import HistoryManager
+# We split the logic into separate modules to meet the HD requirement for
 # code structure and readability by avoiding a single massive file.
 from core.image_model import ImageModel
-from core.history import HistoryManager
 from core.image_processor import ImageProcessor
+
 
 class EditorApp:
     """
@@ -17,7 +21,7 @@ class EditorApp:
         self.root = root
         # A professional title and size ensure the app meets the 
         # 'Main Window' usability criteria in the rubric[cite: 26].
-        self.root.title("HIT137 Assignment 3 - Image Editor") 
+        self.root.title("HIT137 Assignment 3 - Group 22 - Image Editor")
         self.root.geometry("1000x700")
 
         # Initializing these here demonstrates the 'Constructor' OOP concept[cite: 15].
@@ -26,7 +30,8 @@ class EditorApp:
         self.model = ImageModel()
         self.history = HistoryManager()
         self.processor = ImageProcessor()
-
+        self.current_file_path = None
+        self.unsaved_changes = False
         # Modularizing setup into methods keeps the constructor clean and 
         # allows for easier debugging of specific UI components.
         self.setup_menu()       
@@ -81,6 +86,36 @@ class EditorApp:
         tk.Label(self.controls, text="Blur Intensity").pack()
         self.blur_slider = tk.Scale(self.controls, from_=0, to=10, orient=tk.HORIZONTAL)
         self.blur_slider.pack(pady=5)
+        tk.Button(self.controls, text="Grayscale", command=self.apply_grayscale).pack(pady=5, fill="x")
+        tk.Button(self.controls, text="Blur", command=self.apply_blur).pack(pady=5, fill="x")
+        tk.Button(self.controls, text="Edge", command=self.apply_edge).pack(pady=5, fill="x")
+
+    def apply_grayscale(self):
+        if not self.model.has_image():
+            messagebox.showinfo("Info", "Please open an image first.")
+            return
+        self.history.push(self.model.current_image)
+        out = self.processor.to_grayscale(self.model.current_image)
+        self.model.apply_new_current(out)
+        self.status_text.set("Applied: Grayscale")
+
+    def apply_blur(self):
+        if not self.model.has_image():
+            messagebox.showinfo("Info", "Please open an image first.")
+            return
+        self.history.push(self.model.current_image)
+        out = self.processor.blur(self.model.current_image, self.blur_slider.get())
+        self.model.apply_new_current(out)
+        self.status_text.set("Applied: Blur")
+
+    def apply_edge(self):
+        if not self.model.has_image():
+            messagebox.showinfo("Info", "Please open an image first.")
+            return
+        self.history.push(self.model.current_image)
+        out = self.processor.edge_detection(self.model.current_image)
+        self.model.apply_new_current(out)
+        self.status_text.set("Applied: Edge")
 
     def setup_status_bar(self):
         """
@@ -102,21 +137,29 @@ class EditorApp:
         if file_path:
             # Updating the status bar here provides immediate visual 
             # confirmation that the user's action was successful[cite: 30].
-            self.status_text.set(f"Loaded: {file_path}")
+            # self.status_text.set(f"Loaded: {file_path}")
+            bgr = cv2.imread(file_path)
+            if bgr is None:
+                messagebox.showerror("Error", "Cannot load image.")
+                return
+
+            self.model.set_image(bgr, Path(file_path))
+            self.history.clear()
+            self.history.push(self.model.current_image)
+
+            self.current_file_path = file_path
+            self.unsaved_changes = False
+            self.status_text.set(f"Loaded: {file_path} ({bgr.shape[1]}x{bgr.shape[0]})")
 
     # Logic stubs below allow Members 1 and 3 to implement their 
     # logic without breaking the main UI thread.
-    def save_file(self): 
-         """
-    Saves the current image to disk. 
-    If no file path exists, delegates to save_as_file().
-        """
+    def save_file(self):
         if self.current_file_path is None:
-        self.save_as_file()
+            self.save_as_file()
         else:
         # self.model.save(self.current_file_path)
-        self.unsaved_changes = False
-        self.status_text.set(f"Saved: {self.current_file_path}")
+            self.unsaved_changes = False
+            self.status_text.set(f"Saved: {self.current_file_path}")
 
     def save_as_file(self): 
         """
@@ -124,22 +167,23 @@ class EditorApp:
     then updates the app state after saving the image.
     Cancels gracefully if the user closes the dialog.
     """
-    file_path = filedialog.asksaveasfilename(
-        defaultextension=".png",
-        filetypes=[
-            ("PNG files", "*.png"),
-            ("JPEG files", "*.jpg"),
-            ("All files", "*.*")
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg"),
+                ("All files", "*.*")
         ]
     )
 
         if not file_path:
-            return  # User cancelled
+            return
 
     # Later: self.model.save(file_path)
         self.current_file_path = file_path
         self.unsaved_changes = False
         self.status_text.set(f"Saved as: {file_path}")
+
     def undo_action(self): pass
     def redo_action(self): pass
 
