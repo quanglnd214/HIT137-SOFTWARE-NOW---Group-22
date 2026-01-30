@@ -39,23 +39,42 @@ class ImageProcessor:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         edges = cv2.Canny(gray, t1, t2)
         return cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+    @staticmethod
+    def adjust_brightness(image: np.ndarray, value: int) -> np.ndarray:
+        """Adjust image brightness."""
+        return cv2.convertScaleAbs(image, alpha=1.0, beta=value)
 
     @staticmethod
-    def adjust_brightness(self, image, value: int):
-        pass
+    def adjust_contrast(image: np.ndarray, value: float) -> np.ndarray:
+        """Adjust image contrast."""
+        return cv2.convertScaleAbs(image, alpha=value, beta=0)
 
     @staticmethod
-    def adjust_contrast(self, image, value: float):
-        pass
+    def rotate(image: np.ndarray, angle: int) -> np.ndarray:
+        """Rotate image by 90, 180 or 270 degrees."""
+        angle = angle % 360
+        if angle == 90:
+            return cv2.rotate(image, cv2.ROTATE_90_CLOCKWISE)
+        if angle == 180:
+            return cv2.rotate(image, cv2.ROTATE_180)
+        if angle == 270:
+            return cv2.rotate(image, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        return image
 
     @staticmethod
-    def rotate(self, image, angle: int):
-        pass
+    def flip(image: np.ndarray, mode: str) -> np.ndarray:
+        """Flip image horizontally or vertically."""
+        if mode == "h":
+            return cv2.flip(image, 1)
+        if mode == "v":
+            return cv2.flip(image, 0)
+        return image
 
     @staticmethod
-    def flip(self, image, mode: str):
-        pass
-
-    @staticmethod
-    def resize(self, image, scale: int):
-        pass
+    def resize(image: np.ndarray, scale: int) -> np.ndarray:
+        """Resize image by scale percentage."""
+        scale = max(10, min(scale, 300))
+        height, width = image.shape[:2]
+        new_w = int(width * scale / 100)
+        new_h = int(height * scale / 100)
+        return cv2.resize(image, (new_w, new_h))
