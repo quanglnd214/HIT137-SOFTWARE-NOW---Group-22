@@ -148,9 +148,12 @@ class EditorApp:
         if image is None:
             messagebox.showerror("Error", "Cannot load image.")
         else:
-            self.current_image = image  # store the loaded image
-            print(f"Opened: {file_path}")  # simple confirmation in console
-
+            self.current_image = image
+            self.display_image(image)
+            # Update status bar with filename and dimensions
+            h, w = image.shape[:2]
+            self.status_text.set(f"Opened: {file_path} ({w}x{h})")
+            
 
     # Logic stubs below allow Members 1 and 3 to implement their 
     # logic without breaking the main UI thread.
@@ -183,8 +186,27 @@ class EditorApp:
     print(f"Saved as: {file_path}")  # Simple confirmation
 
 
-    def undo_action(self): pass
-    def redo_action(self): pass
+    def undo_action(self): 
+        if self.undo_stack:
+        last_image = self.undo_stack.pop()
+        self.redo_stack.append(self.current_image.copy())
+        self.current_image = last_image.copy()
+        self.display_image(self.current_image)
+        self.status_text.set("Undo performed")
+
+    else:
+        self.status_label.config(text="Nothing to undo")
+
+    def redo_action(self): 
+        if self.redo_stack:
+        next_image = self.redo_stack.pop()
+        self.undo_stack.append(self.current_image.copy())
+        self.current_image = next_image.copy()
+        self.display_image(self.current_image)
+        self.status_text.set("Redo performed")
+
+    else:
+        self.status_label.config(text="Nothing to redo")
 
 if __name__ == "__main__":
     # Standard boilerplate to ensure the app only launches when 
