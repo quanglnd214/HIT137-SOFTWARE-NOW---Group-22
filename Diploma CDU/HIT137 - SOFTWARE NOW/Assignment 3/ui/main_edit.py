@@ -195,7 +195,8 @@ class EditorApp:
         self.status_text.set("Undo performed")
 
     else:
-        self.status_label.config(text="Nothing to undo")
+      self.status_text.set("Nothing to undo")
+
 
     def redo_action(self): 
         if self.redo_stack:
@@ -206,7 +207,7 @@ class EditorApp:
         self.status_text.set("Redo performed")
 
     else:
-        self.status_label.config(text="Nothing to redo")
+        self.status_text.set("Nothing to redo")
 
 if __name__ == "__main__":
     # Standard boilerplate to ensure the app only launches when 
