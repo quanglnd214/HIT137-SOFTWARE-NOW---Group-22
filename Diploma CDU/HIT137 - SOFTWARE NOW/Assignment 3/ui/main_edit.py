@@ -164,7 +164,8 @@ class EditorApp:
     else:
         #  saves the image to the existing path
         cv2.imwrite(self.current_file_path, self.current_image)
-        # Mark as saved
+         # mark it as saved so the program knows there are no unsaved changes,
+         
         self.unsaved_changes = False
         #  print confirmation 
         print(f"Saved: {self.current_file_path}")
