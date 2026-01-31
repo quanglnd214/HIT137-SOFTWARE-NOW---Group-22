@@ -143,61 +143,54 @@ class EditorApp:
         status_bar = tk.Label(self.root, textvariable=self.status_text, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
-    def open_file(self):
-    # Let the user select an image file
-    file_path = filedialog.askopenfilename(
-        filetypes=[("Image files", "*.jpg *.png *.bmp")]
-    )
-
-    if file_path:
-        # Read the image using OpenCV
-        image = cv2.imread(file_path)
-        if image is None:
-            messagebox.showerror("Error", "Cannot load image.")
-        else:
-            self.current_image = image
-            self.display_image(image)
-            # Update status bar with filename and dimensions
-            h, w = image.shape[:2]
-            self.status_text.set(f"Opened: {file_path} ({w}x{h})")
-
-            # Clear history when opening a new file
-            self.history.clear()
-            self.unsaved_changes = False
-            
-
-    # Logic stubs below allow Members 1 and 3 to implement their 
-    # logic without breaking the main UI thread.
     def save_file(self):
+    """
+    Save the current image to disk.
+    If the file has never been saved, delegate to save_as_file().
+    
+    """
     if self.current_file_path is None:
-        # If there’s no file path yet, asks the user where to save
+        # Ask user where to save
         self.save_as_file()
     else:
-        # Save the image to the existing path
+        # Save to existing path
         cv2.imwrite(self.current_file_path, self.current_image)
-        # Mark it as saved so the program knows there are no unsaved changes
-        self.unsaved_changes = False
-        # Print confirmation
+        self.unsaved_changes = False  # mark as saved
         print(f"Saved: {self.current_file_path}")
 
-    def save_as_file(self):
-        file_path = filedialog.asksaveasfilename(
-            defaultextension=".png",
-            filetypes=[
-                ("PNG files", "*.png"),
-                ("JPEG files", "*.jpg"),
-                ("BMP files", "*.bmp")])
 
-        if not file_path:
-            return
+def save_as_file(self):
+    """
+    Open a "Save As" dialog to let the user choose a path and filename.
+    Updates current_file_path and resets unsaved_changes flag.
+    
+    """
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".png",
+        filetypes=[
+            ("PNG files", "*.png"),
+            ("JPEG files", "*.jpg"),
+            ("BMP files", "*.bmp")
+        ]
+    )
 
-        cv2.imwrite(file_path, self.current_image)  #  save the image
-        self.current_file_path = file_path
-        self.unsaved_changes = False
-        print(f"Saved as: {file_path}") 
+    if not file_path:
+        return  # User cancelled
+
+    # Save image to chosen path
+    cv2.imwrite(file_path, self.current_image)
+    self.current_file_path = file_path
+    self.unsaved_changes = False
+    print(f"Saved as: {file_path}")
 
 
-    def undo_action(self):
+def undo_action(self):
+    """
+    Undo the last image operation.
+    Calls HistoryManager to retrieve the previous image state.
+    Updates the canvas and status bar.
+    
+    """
     image = self.history.undo(self.model.current_image)
     if image is not None:
         self.model.apply_new_current(image)
@@ -207,7 +200,13 @@ class EditorApp:
         self.status_text.set("Nothing to undo")
 
 
-    def redo_action(self):
+def redo_action(self):
+    """
+    Redo the last undone operation.
+    Calls HistoryManager to retrieve the next image state.
+    Updates the canvas and status bar.
+    
+    """
     image = self.history.redo(self.model.current_image)
     if image is not None:
         self.model.apply_new_current(image)
@@ -215,6 +214,7 @@ class EditorApp:
         self.status_text.set("Redo performed")
     else:
         self.status_text.set("Nothing to redo")
+
 
 if __name__ == "__main__":
     # Standard boilerplate to ensure the app only launches when 
