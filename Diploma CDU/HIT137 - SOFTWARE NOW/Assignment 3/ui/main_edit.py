@@ -37,6 +37,13 @@ class EditorApp:
         self.setup_menu()       
         self.setup_gui()        
         self.setup_status_bar() 
+        
+    def bind_shortcuts(self):
+        # Keyboard shortcuts allow efficient use of the program
+        self.root.bind("Control-o", lambda e: self.open_file())
+        self.root.bind("Control-s", lambda e: self.save_file())
+        self.root.bind("Control-Shift-s", lambda e: self.save_as_file())
+        self.root.bind("Escape", lambda e: self.root.quit())
 
     def setup_menu(self):
         """
