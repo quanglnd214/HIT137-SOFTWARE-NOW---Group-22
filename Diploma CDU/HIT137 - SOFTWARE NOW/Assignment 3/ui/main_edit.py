@@ -144,37 +144,41 @@ class EditorApp:
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def open_file(self):
-      
     # Let the user select an image file
-        file_path = filedialog.askopenfilename(
-            filetypes=[("Image files", "*.jpg *.png *.bmp")])
-    
-        if file_path:
-            # Read the image using OpenCV
-            image = cv2.imread(file_path)
-            if image is None:
-                messagebox.showerror("Error", "Cannot load image.")
-            else:
-                self.current_image = image
-                self.display_image(image)
-                # Update status bar with filename and dimensions
-                h, w = image.shape[:2]
-                self.status_text.set(f"Opened: {file_path} ({w}x{h})")
+    file_path = filedialog.askopenfilename(
+        filetypes=[("Image files", "*.jpg *.png *.bmp")]
+    )
+
+    if file_path:
+        # Read the image using OpenCV
+        image = cv2.imread(file_path)
+        if image is None:
+            messagebox.showerror("Error", "Cannot load image.")
+        else:
+            self.current_image = image
+            self.display_image(image)
+            # Update status bar with filename and dimensions
+            h, w = image.shape[:2]
+            self.status_text.set(f"Opened: {file_path} ({w}x{h})")
+
+            # Clear history when opening a new file
+            self.history.clear()
+            self.unsaved_changes = False
             
 
     # Logic stubs below allow Members 1 and 3 to implement their 
     # logic without breaking the main UI thread.
     def save_file(self):
-        if self.current_file_path is None:
+    if self.current_file_path is None:
         # If there’s no file path yet, asks the user where to save
-            self.save_as_file()
-        else:
-            #  saves the image to the existing path
-            cv2.imwrite(self.current_file_path, self.current_image)
-             # mark it as saved so the program knows there are no unsaved changes,
-            self.unsaved_changes = False
-             #  print confirmation 
-            print(f"Saved: {self.current_file_path}")
+        self.save_as_file()
+    else:
+        # Save the image to the existing path
+        cv2.imwrite(self.current_file_path, self.current_image)
+        # Mark it as saved so the program knows there are no unsaved changes
+        self.unsaved_changes = False
+        # Print confirmation
+        print(f"Saved: {self.current_file_path}")
 
     def save_as_file(self):
         file_path = filedialog.asksaveasfilename(
@@ -190,7 +194,7 @@ class EditorApp:
         cv2.imwrite(file_path, self.current_image)  #  save the image
         self.current_file_path = file_path
         self.unsaved_changes = False
-        print(f"Saved as: {file_path}")   confirmation
+        print(f"Saved as: {file_path}") 
 
 
     def undo_action(self):
