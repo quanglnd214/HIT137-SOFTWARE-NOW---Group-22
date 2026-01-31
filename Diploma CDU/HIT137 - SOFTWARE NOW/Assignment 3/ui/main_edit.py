@@ -146,76 +146,75 @@ class EditorApp:
     def open_file(self):
       
     # Let the user select an image file
-    file_path = filedialog.askopenfilename(
-        filetypes=[("Image files", "*.jpg *.png *.bmp")])
+        file_path = filedialog.askopenfilename(
+            filetypes=[("Image files", "*.jpg *.png *.bmp")])
     
-    if file_path:
-        # Read the image using OpenCV
-        image = cv2.imread(file_path)
-        if image is None:
-            messagebox.showerror("Error", "Cannot load image.")
-        else:
-            self.current_image = image
-            self.display_image(image)
-            # Update status bar with filename and dimensions
-            h, w = image.shape[:2]
-            self.status_text.set(f"Opened: {file_path} ({w}x{h})")
+        if file_path:
+            # Read the image using OpenCV
+            image = cv2.imread(file_path)
+            if image is None:
+                messagebox.showerror("Error", "Cannot load image.")
+            else:
+                self.current_image = image
+                self.display_image(image)
+                # Update status bar with filename and dimensions
+                h, w = image.shape[:2]
+                self.status_text.set(f"Opened: {file_path} ({w}x{h})")
             
 
     # Logic stubs below allow Members 1 and 3 to implement their 
     # logic without breaking the main UI thread.
     def save_file(self):
-    if self.current_file_path is None:
+        if self.current_file_path is None:
         # If there’s no file path yet, asks the user where to save
-        self.save_as_file()
-    else:
-        #  saves the image to the existing path
-        cv2.imwrite(self.current_file_path, self.current_image)
-         # mark it as saved so the program knows there are no unsaved changes,
-         
-        self.unsaved_changes = False
-        #  print confirmation 
-        print(f"Saved: {self.current_file_path}")
+            self.save_as_file()
+        else:
+            #  saves the image to the existing path
+            cv2.imwrite(self.current_file_path, self.current_image)
+             # mark it as saved so the program knows there are no unsaved changes,
+            self.unsaved_changes = False
+             #  print confirmation 
+            print(f"Saved: {self.current_file_path}")
 
     def save_as_file(self):
-    file_path = filedialog.asksaveasfilename(
-        defaultextension=".png",
-        filetypes=[
-            ("PNG files", "*.png"),
-            ("JPEG files", "*.jpg"),
-            ("BMP files", "*.bmp")])
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg"),
+                ("BMP files", "*.bmp")])
 
-    if not file_path:
-        return
+        if not file_path:
+            return
 
-    cv2.imwrite(file_path, self.current_image)  # Actually save the image
-    self.current_file_path = file_path
-    self.unsaved_changes = False
-    print(f"Saved as: {file_path}")  # Simple confirmation
+        cv2.imwrite(file_path, self.current_image)  #  save the image
+        self.current_file_path = file_path
+        self.unsaved_changes = False
+        print(f"Saved as: {file_path}")   confirmation
 
 
     def undo_action(self): 
         if self.undo_stack:
-        last_image = self.undo_stack.pop()
-        self.redo_stack.append(self.current_image.copy())
-        self.current_image = last_image.copy()
-        self.display_image(self.current_image)
-        self.status_text.set("Undo performed")
+            last_image = self.undo_stack.pop()
+            self.redo_stack.append(self.current_image.copy())
+            self.current_image = last_image.copy()
+            self.display_image(self.current_image)
+            self.status_text.set("Undo performed")
 
-    else:
-      self.status_text.set("Nothing to undo")
+        else:
+            self.status_text.set("Nothing to undo")
 
 
     def redo_action(self): 
         if self.redo_stack:
-        next_image = self.redo_stack.pop()
-        self.undo_stack.append(self.current_image.copy())
-        self.current_image = next_image.copy()
-        self.display_image(self.current_image)
-        self.status_text.set("Redo performed")
+            next_image = self.redo_stack.pop()
+            self.undo_stack.append(self.current_image.copy())
+            self.current_image = next_image.copy()
+            self.display_image(self.current_image)
+            self.status_text.set("Redo performed")
 
-    else:
-        self.status_text.set("Nothing to redo")
+        else:
+            self.status_text.set("Nothing to redo")
 
 if __name__ == "__main__":
     # Standard boilerplate to ensure the app only launches when 
