@@ -193,28 +193,24 @@ class EditorApp:
         print(f"Saved as: {file_path}")   confirmation
 
 
-    def undo_action(self): 
-        if self.undo_stack:
-            last_image = self.undo_stack.pop()
-            self.redo_stack.append(self.current_image.copy())
-            self.current_image = last_image.copy()
-            self.display_image(self.current_image)
-            self.status_text.set("Undo performed")
-
-        else:
-            self.status_text.set("Nothing to undo")
+    def undo_action(self):
+    image = self.history.undo(self.model.current_image)
+    if image is not None:
+        self.model.apply_new_current(image)
+        self.display_image(image)
+        self.status_text.set("Undo performed")
+    else:
+        self.status_text.set("Nothing to undo")
 
 
-    def redo_action(self): 
-        if self.redo_stack:
-            next_image = self.redo_stack.pop()
-            self.undo_stack.append(self.current_image.copy())
-            self.current_image = next_image.copy()
-            self.display_image(self.current_image)
-            self.status_text.set("Redo performed")
-
-        else:
-            self.status_text.set("Nothing to redo")
+    def redo_action(self):
+    image = self.history.redo(self.model.current_image)
+    if image is not None:
+        self.model.apply_new_current(image)
+        self.display_image(image)
+        self.status_text.set("Redo performed")
+    else:
+        self.status_text.set("Nothing to redo")
 
 if __name__ == "__main__":
     # Standard boilerplate to ensure the app only launches when 
