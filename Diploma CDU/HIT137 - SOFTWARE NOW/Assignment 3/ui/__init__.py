@@ -21,7 +21,8 @@
             return
 
         # Update the model and display on canvas
-        self.model.apply_new_current(image)
+        self.model.set_image(image, Path(file_path))
+        self.history.clear()
         self.display_image(image)
         self.current_file_path = file_path
         self.unsaved_changes = False
@@ -41,7 +42,7 @@
             self.save_as_file()
         else:
             # Save to existing path
-            cv2.imwrite(self.current_file_path, self.current_image)
+            cv2.imwrite(self.current_file_path, self.mode.current_image)
             self.unsaved_changes = False  # mark as saved
             print(f"Saved: {self.current_file_path}")
 
