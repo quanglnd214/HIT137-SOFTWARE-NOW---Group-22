@@ -244,11 +244,8 @@ class EditorApp:
             self.status_text.set("Redo performed")
         else:
             self.status_text.set("Nothing to redo")
-
-
-    if __name__ == "__main__":
-        # Standard boilerplate to ensure the app only launches when 
-        # executed directly, not when imported as a module.
-        root = tk.Tk()
-        app = EditorApp(root)
-        root.mainloop()
+        # End of class EditorApp
+        if __name__ == "__main__":
+            root = tk.Tk()
+            app = EditorApp(root)
+            root.mainloop()
