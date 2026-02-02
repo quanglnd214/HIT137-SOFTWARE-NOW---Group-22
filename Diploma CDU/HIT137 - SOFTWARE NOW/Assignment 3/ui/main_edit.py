@@ -68,9 +68,23 @@ class EditorApp:
         edit_menu.add_command(label="Undo", command=self.undo_action)
         edit_menu.add_command(label="Redo", command=self.redo_action)
         menubar.add_cascade(label="Edit", menu=edit_menu)
+        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu.add_command(label="About", command=self.show_about)
+        menubar.add_cascade(label="Help", menu=help_menu)
 
         self.root.config(menu=menubar)
 
+    def show_about(self):
+        # Displays a message box with program information
+        messagebox.showinfo(
+            "About",
+            "HIT137 Assignment 3 - Image Editor\n\n"
+            "Built with Tkinker + OpenCV\n"
+            "Features:\n"
+            "- Open / Save / Save As\n"
+            "- Undo / Redo\n"
+            "- Grayscale, Blur, Edge, Invert\n")
+    
     def setup_gui(self):
         """
         Uses a Frame-based layout to separate the 'Control Panel' from 
@@ -244,6 +258,8 @@ class EditorApp:
             self.status_text.set("Redo performed")
         else:
             self.status_text.set("Nothing to redo")
+        
+
         # End of class EditorApp
         if __name__ == "__main__":
             root = tk.Tk()
