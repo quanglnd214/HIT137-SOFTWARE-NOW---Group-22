@@ -33,7 +33,8 @@ class EditorUI:
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="Open", command=self.controller.open_file)
         file_menu.add_command(label="Save", command=self.controller.save_file)
-        file_menu.add_command(label="Save As", command=self.controller.save_as_file)
+        file_menu.add_command(
+            label="Save As", command=self.controller.save_as_file)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.root.quit)
 
@@ -41,8 +42,10 @@ class EditorUI:
 
         # Edit menu
         edit_menu = tk.Menu(menubar, tearoff=0)
-        edit_menu.add_command(label="Undo", command=self.controller.undo_action)
-        edit_menu.add_command(label="Redo", command=self.controller.redo_action)
+        edit_menu.add_command(
+            label="Undo", command=self.controller.undo_action)
+        edit_menu.add_command(
+            label="Redo", command=self.controller.redo_action)
 
         menubar.add_cascade(label="Edit", menu=edit_menu)
 
@@ -79,6 +82,13 @@ class EditorUI:
             to=10,
             orient=tk.HORIZONTAL)
         self.blur_slider.pack(pady=5)
+
+        # Brightness Slider
+        tk.Label(self.controls, text="Brightness", bg="gray85").pack()
+        self.brightness_slider = tk.Scale(
+            self.controls, from_=-100, to=100, orient=tk.HORIZONTAL)
+        self.brightness_slider.set(0)  # Default neutral
+        self.brightness_slider.pack(pady=5, fill="x", padx=10)
 
         # Filter buttons
         tk.Button(
@@ -124,7 +134,8 @@ class EditorUI:
     def bind_shortcuts(self):
         self.root.bind("<Control-o>", lambda e: self.controller.open_file())
         self.root.bind("<Control-s>", lambda e: self.controller.save_file())
-        self.root.bind("<Control-Shift-S>", lambda e: self.controller.save_as_file())
+        self.root.bind("<Control-Shift-S>",
+                       lambda e: self.controller.save_as_file())
         self.root.bind("<Escape>", lambda e: self.root.quit())
 
         # About popup
@@ -140,4 +151,3 @@ class EditorUI:
             "- Blur (slider)\n"
             "- Edge Detection\n"
             "- Invert Colours\n")
-
