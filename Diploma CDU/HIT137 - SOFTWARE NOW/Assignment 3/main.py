@@ -1,6 +1,8 @@
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
+
 
 import cv2
 
@@ -10,42 +12,49 @@ from core.history import HistoryManager
 from core.image_model import ImageModel
 from core.image_processor import ImageProcessor
 
-
-class EditorApp:
+class EditorApp():
     """
-    The 'Controller' class in our architecture. 
-    It exists to manage the interaction between the data (Model) and the 
+    The 'Controller' class in our architecture.
+    It exists to manage the interaction between the data (Model) and the
     user interface (View), satisfying the 'Class Interaction' OOP requirement[cite: 15].
     """
+
     def __init__(self, root):
         self.root = root
-        # A professional title and size ensure the app meets the 
+        # A professional title and size ensure the app meets the
         # 'Main Window' usability criteria in the rubric[cite: 26].
         self.root.title("HIT137 Assignment 3 - Group 22 - Image Editor")
         self.root.geometry("1000x700")
 
         # Initializing these here demonstrates the 'Constructor' OOP concept[cite: 15].
-        # We instantiate these classes so that EditorApp can delegate specialized 
+        # We instantiate these classes so that EditorApp can delegate specialized
         # tasks (like history tracking or image filtering) to them[cite: 15].
         self.model = ImageModel()
         self.history = HistoryManager()
         self.processor = ImageProcessor()
         self.current_file_path = None
         self.unsaved_changes = False
-        # Modularizing setup into methods keeps the constructor clean and 
+        # Modularizing setup into methods keeps the constructor clean and
         # allows for easier debugging of specific UI components.
-        self.setup_menu()       
-        self.setup_gui()        
-        self.setup_status_bar() 
+        self.setup_menu()
+        self.setup_gui()
+        self.setup_status_bar()
+
+    def bind_shortcuts(self):
+        # Keyboard shortcuts allow efficient use of the program
+        self.root.bind("Control-o", lambda e: self.open_file())
+        self.root.bind("Control-s", lambda e: self.save_file())
+        self.root.bind("Control-Shift-s", lambda e: self.save_as_file())
+        self.root.bind("Escape", lambda e: self.root.quit())
 
     def setup_menu(self):
         """
-        Required by functional requirements to provide standard desktop 
+        Required by functional requirements to provide standard desktop
         navigation for file and edit operations.
         """
         menubar = tk.Menu(self.root)
-        
-        # Grouping file operations separately allows for a predictable 
+
+        # Grouping file operations separately allows for a predictable
         # user experience consistent with GUI standards.
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="Open", command=self.open_file)
@@ -55,48 +64,64 @@ class EditorApp:
         file_menu.add_command(label="Exit", command=self.root.quit)
         menubar.add_cascade(label="File", menu=file_menu)
 
-        # The Edit menu is specifically required to support 
+        # The Edit menu is specifically required to support
         # Undo/Redo functionality.
         edit_menu = tk.Menu(menubar, tearoff=0)
         edit_menu.add_command(label="Undo", command=self.undo_action)
         edit_menu.add_command(label="Redo", command=self.redo_action)
         menubar.add_cascade(label="Edit", menu=edit_menu)
+        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu.add_command(label="About", command=self.show_about)
+        menubar.add_cascade(label="Help", menu=help_menu)
 
         self.root.config(menu=menubar)
 
+    def show_about(self):
+        # Displays a message box with program information
+        messagebox.showinfo(
+            "About",
+            "HIT137 Assignment 3 - Image Editor\n\n"
+            "Built with Tkinker + OpenCV\n"
+            "Features:\n"
+            "- Open / Save / Save As\n"
+            "- Undo / Redo\n"
+            "- Grayscale, Blur, Edge, Invert\n")
+
     def setup_gui(self):
         """
-        Uses a Frame-based layout to separate the 'Control Panel' from 
+        Uses a Frame-based layout to separate the 'Control Panel' from
         the 'Image Display Area' as per GUI requirements[cite: 28, 29].
         """
-        # A sidebar provides a dedicated space for filters without 
+        # A sidebar provides a dedicated space for filters without
         # obstructing the view of the image being edited[cite: 29].
         self.controls = tk.Frame(self.root, width=200, bg="gray85")
         self.controls.pack(side=tk.LEFT, fill=tk.Y)
 
-        # The Canvas is the primary visual feedback for the user; 
+        # The Canvas is the primary visual feedback for the user;
         # it must expand to utilize available screen space[cite: 28].
         self.canvas = tk.Canvas(self.root, bg="gray30")
         self.canvas.pack(expand=True, fill=tk.BOTH)
 
-        # A slider is explicitly required to allow for variable 
+        # A slider is explicitly required to allow for variable
         # parameter inputs (like blur radius)[cite: 33].
         tk.Label(self.controls, text="Filter Controls", font=('Arial', 12, 'bold')).pack(pady=10)
-        
+
         tk.Label(self.controls, text="Blur Intensity").pack()
         self.blur_slider = tk.Scale(self.controls, from_=0, to=10, orient=tk.HORIZONTAL)
         self.blur_slider.pack(pady=5)
         tk.Button(self.controls, text="Grayscale", command=self.apply_grayscale).pack(pady=5, fill="x")
         tk.Button(self.controls, text="Blur", command=self.apply_blur).pack(pady=5, fill="x")
         tk.Button(self.controls, text="Edge", command=self.apply_edge).pack(pady=5, fill="x")
+        tk.Button(self.controls, text="Invert Colours", command=self.apply_invert).pack(pady=5, fill="x")
 
     def apply_grayscale(self):
         if not self.model.has_image():
             messagebox.showinfo("Info", "Please open an image first.")
             return
         self.history.push(self.model.current_image)
-        out = self.processor.to_grayscale(self.model.current_image)
+        out = ImageProcessor.to_grayscale(self.model.current_image)
         self.model.apply_new_current(out)
+        self.display_image(self.model.current_image)
         self.status_text.set("Applied: Grayscale")
 
     def apply_blur(self):
@@ -106,6 +131,7 @@ class EditorApp:
         self.history.push(self.model.current_image)
         out = self.processor.blur(self.model.current_image, self.blur_slider.get())
         self.model.apply_new_current(out)
+        self.display_image(self.model.current_image)
         self.status_text.set("Applied: Blur")
 
     def apply_edge(self):
@@ -115,81 +141,159 @@ class EditorApp:
         self.history.push(self.model.current_image)
         out = self.processor.edge_detection(self.model.current_image)
         self.model.apply_new_current(out)
+        self.display_image(self.model.current_image)
         self.status_text.set("Applied: Edge")
+
+    def apply_invert(self):
+        if not self.model.has_image():
+            messagebox.showinfo("Info", "Please open an image first.")
+            return
+        self.history.push(self.model.current_image)
+        out = self.processor.invert(self.model.current_image)
+        self.model.apply_new_current(out)
+        self.status_text.set("Applied: Invert Colours")
 
     def setup_status_bar(self):
         """
-        Provides metadata feedback (like dimensions) to the user, which is a 
+        Provides metadata feedback (like dimensions) to the user, which is a
         mandatory GUI element for the status bar requirement[cite: 30].
         """
         self.status_text = tk.StringVar(value="Ready")
         status_bar = tk.Label(self.root, textvariable=self.status_text, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
+    def display_image(self, image):
+        """Display an OpenCV image on the Tkinter canvas."""
+
+        # Convert BGR to RGB
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Convert to PIL image
+        pil_img = Image.fromarray(rgb)
+
+        # Get canvas size
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
+
+        if canvas_w > 1 and canvas_h > 1:
+            pil_img = pil_img.resize((canvas_w, canvas_h), Image.LANCZOS)
+
+        # Convert to Tk image
+        self.tk_image = ImageTk.PhotoImage(pil_img)
+
+        # Clear and draw
+        self.canvas.delete("all")
+        self.canvas.create_image(
+            canvas_w // 2,
+            canvas_h // 2,
+            anchor=tk.CENTER,
+            image=self.tk_image)
+
     def open_file(self):
         """
-        Encapsulates file selection to ensure only supported formats 
-        (JPG, PNG, BMP) are passed to the processor[cite: 32].
+        Let the user select an image file and open it.
+
+
         """
+        # File dialog to select image
         file_path = filedialog.askopenfilename(
             filetypes=[("Image files", "*.jpg *.png *.bmp")]
         )
-        if file_path:
-            # Updating the status bar here provides immediate visual 
-            # confirmation that the user's action was successful[cite: 30].
-            # self.status_text.set(f"Loaded: {file_path}")
-            bgr = cv2.imread(file_path)
-            if bgr is None:
-                messagebox.showerror("Error", "Cannot load image.")
-                return
 
-            self.model.set_image(bgr, Path(file_path))
-            self.history.clear()
-            self.history.push(self.model.current_image)
+        if not file_path:
+            return  # User cancelled
 
-            self.current_file_path = file_path
-            self.unsaved_changes = False
-            self.status_text.set(f"Loaded: {file_path} ({bgr.shape[1]}x{bgr.shape[0]})")
+        # Read the image using OpenCV
+        image = cv2.imread(file_path)
+        if image is None:
+            messagebox.showerror("Error", "Cannot load image.")
+            return
 
-    # Logic stubs below allow Members 1 and 3 to implement their 
-    # logic without breaking the main UI thread.
+        # Update the model and display on canvas
+        self.model.set_image(image, Path(file_path))
+        self.history.clear()
+        self.display_image(image)
+        # self.history.push(self.model.current_image)
+        self.current_file_path = file_path
+        self.unsaved_changes = False
+
+        # Update status bar with filename and dimensions
+        h, w = image.shape[:2]
+        self.status_text.set(f"Opened: {file_path} ({w}x{h})")
+
     def save_file(self):
+        """
+        Save the current image to disk.
+        If the file has never been saved, delegate to save_as_file().
+
+        """
         if self.current_file_path is None:
+            # Ask user where to save
             self.save_as_file()
         else:
-        # self.model.save(self.current_file_path)
-            self.unsaved_changes = False
-            self.status_text.set(f"Saved: {self.current_file_path}")
+            # Save to existing path
+            cv2.imwrite(self.current_file_path, self.model.current_image)
+            self.unsaved_changes = False  # mark as saved
+            print(f"Saved: {self.current_file_path}")
 
-    def save_as_file(self): 
+    def save_as_file(self):
         """
-    Prompts the user to choose a file name and location, 
-    then updates the app state after saving the image.
-    Cancels gracefully if the user closes the dialog.
-    """
+        Open a "Save As" dialog to let the user choose a path and filename.
+        Updates current_file_path and resets unsaved_changes flag.
+
+        """
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[
                 ("PNG files", "*.png"),
                 ("JPEG files", "*.jpg"),
-                ("All files", "*.*")
-        ]
-    )
+                ("BMP files", "*.bmp")]
+        )
 
         if not file_path:
-            return
+            return  # User cancelled
 
-    # Later: self.model.save(file_path)
-        self.current_file_path = file_path
-        self.unsaved_changes = False
-        self.status_text.set(f"Saved as: {file_path}")
+        # Save image to chosen path
+        ok = cv2.imwrite(file_path, self.model.current_image)
+        if ok:
+            self.current_file_path = file_path
+            self.unsaved_changes = False
+            self.status_text.set(f"Saved as: {file_path}")
+        else:
+            messagebox.showerror("Error", "Save failed.")
 
-    def undo_action(self): pass
-    def redo_action(self): pass
+    def undo_action(self):
+        """
+        Undo the last image operation.
+        Calls HistoryManager to retrieve the previous image state.
 
+
+        """
+        image = self.history.undo(self.model.current_image)
+        if image is not None:
+            self.model.apply_new_current(image)
+            self.display_image(image)
+            self.status_text.set("Undo performed")
+        else:
+            self.status_text.set("Nothing to undo")
+
+    def redo_action(self):
+        """
+        Redo the last undone operation.
+        Calls HistoryManager to retrieve the next image state.
+        Updates the canvas and status bar.
+
+        """
+        image = self.history.redo(self.model.current_image)
+        if image is not None:
+            self.model.apply_new_current(image)
+            self.display_image(image)
+            self.status_text.set("Redo performed")
+        else:
+            self.status_text.set("Nothing to redo")
+
+        # End of class EditorApp
 if __name__ == "__main__":
-    # Standard boilerplate to ensure the app only launches when 
-    # executed directly, not when imported as a module.
     root = tk.Tk()
     app = EditorApp(root)
     root.mainloop()

@@ -39,6 +39,12 @@ class ImageProcessor:
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         edges = cv2.Canny(gray, t1, t2)
         return cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+
+    @staticmethod
+    def invert(image: np.ndarray) -> np.ndarray:
+        """Invert colours of a BGR image."""
+        return cv2.bitwise_not(image)
+
     @staticmethod
     def adjust_brightness(image: np.ndarray, value: int) -> np.ndarray:
         """Adjust image brightness."""
@@ -78,3 +84,4 @@ class ImageProcessor:
         new_w = int(width * scale / 100)
         new_h = int(height * scale / 100)
         return cv2.resize(image, (new_w, new_h))
+
