@@ -157,7 +157,6 @@ class EditorApp:
         status_bar = tk.Label(self.root, textvariable=self.status_text, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
     
-    
     def open_file(self):
         """
         Let the user select an image file and open it.
@@ -179,7 +178,8 @@ class EditorApp:
             return
 
         # Update the model and display on canvas
-        self.model.apply_new_current(image)
+        self.model.set_image(image, Path(file_path))
+        self.history.clear()
         self.display_image(image)
         self.current_file_path = file_path
         self.unsaved_changes = False
@@ -187,7 +187,7 @@ class EditorApp:
         # Update status bar with filename and dimensions
         h, w = image.shape[:2]
         self.status_text.set(f"Opened: {file_path} ({w}x{h})")
-
+    
     def save_file(self):
         """
         Save the current image to disk.
@@ -199,7 +199,7 @@ class EditorApp:
             self.save_as_file()
         else:
             # Save to existing path
-            cv2.imwrite(self.current_file_path, self.current_image)
+            cv2.imwrite(self.current_file_path, self.mode.current_image)
             self.unsaved_changes = False  # mark as saved
             print(f"Saved: {self.current_file_path}")
 
@@ -258,7 +258,8 @@ class EditorApp:
             self.status_text.set("Redo performed")
         else:
             self.status_text.set("Nothing to redo")
-        
+
+    
 
         # End of class EditorApp
         if __name__ == "__main__":

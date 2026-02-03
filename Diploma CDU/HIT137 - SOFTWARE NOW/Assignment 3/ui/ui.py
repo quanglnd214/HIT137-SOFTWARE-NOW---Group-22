@@ -1,5 +1,4 @@
 import tkinter as tk
-
 from tkinter import messagebox
 
 
@@ -143,3 +142,4 @@ class EditorUI:
             "- Blur (slider)\n"
             "- Edge Detection\n"
             "- Invert Colours\n")
+
