@@ -156,6 +156,34 @@ class EditorApp:
         self.status_text = tk.StringVar(value="Ready")
         status_bar = tk.Label(self.root, textvariable=self.status_text, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+
+    def display_image(self, image):
+        """Display an OpenCV image on the Tkinter canvas."""
+
+        # Convert BGR to RGB
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Convert to PIL image
+        pil_img = Image.fromarray(rgb)
+
+        # Get canvas size
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
+
+        if canvas_w > 1 and canvas_h > 1:
+            pil_img = pil_img.resize((canvas_w, canvas_h), Image.LANCZOS)
+
+        # Convert to Tk image
+        self.tk_image = ImageTk.PhotoImage(pil_img)
+
+        # Clear and draw
+        self.canvas.delete("all")
+        self.canvas.create_image(
+            canvas_w // 2,
+            canvas_h // 2,
+            anchor=tk.CENTER,
+            image=self.tk_image)
+
     
     def open_file(self):
         """
