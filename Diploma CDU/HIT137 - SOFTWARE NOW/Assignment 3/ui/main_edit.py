@@ -157,7 +157,7 @@ class EditorApp:
         status_bar = tk.Label(self.root, textvariable=self.status_text, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
     
-      def open_file(self):
+    def open_file(self):
         """
         Let the user select an image file and open it.
         
@@ -187,7 +187,7 @@ class EditorApp:
         # Update status bar with filename and dimensions
         h, w = image.shape[:2]
         self.status_text.set(f"Opened: {file_path} ({w}x{h})")
-
+    
     def save_file(self):
         """
         Save the current image to disk.
