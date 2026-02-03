@@ -20,16 +20,14 @@ class EditorUI:
         self.setup_status_bar()
         self.bind_shortcuts()
 
-         # Window
+        # Window
     def setup_window(self):
         self.root.title("HIT137 Image Editor")
         self.root.geometry("1000x700")
 
-         # Menus
+        # Menus
     def setup_menu(self):
         menubar = tk.Menu(self.root)
-
-
 
         # File menu
         file_menu = tk.Menu(menubar, tearoff=0)
