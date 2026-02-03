@@ -103,6 +103,10 @@ class EditorUI:
             self.controls,
             text="Edge",
             command=self.controller.apply_edge).pack(pady=5, fill="x")
+        tk.Button(self.controls, text="Apply Brightness",
+                  command=self.controller.apply_brightness).pack(pady=2, fill="x", padx=10)
+        tk.Button(self.controls, text="Apply Contrast (1.5x)",
+                  command=lambda: self.controller.apply_contrast(1.5)).pack(pady=2, fill="x", padx=10)
 
         # Invert Colours button (your extra controller function)
         tk.Button(

@@ -99,6 +99,10 @@ class EditorApp:
                   command=self.apply_blur).pack(pady=5, fill="x")
         tk.Button(self.controls, text="Edge",
                   command=self.apply_edge).pack(pady=5, fill="x")
+        tk.Button(self.controls, text="Adjust Brightness",
+                  command=self.apply_brightness).pack(pady=5, fill="x")
+        tk.Button(self.controls, text="Contrast (1.5x)", command=lambda: self.apply_contrast(
+            1.5)).pack(pady=5, fill="x")
 
     def apply_grayscale(self):
         if not self.model.has_image():
@@ -127,6 +131,23 @@ class EditorApp:
         out = self.processor.edge_detection(self.model.current_image)
         self.model.apply_new_current(out)
         self.status_text.set("Applied: Edge")
+
+    def apply_brightness(self):
+        if self.prepare_action():
+            val = self.brightness_slider.get()
+            out = self.processor.adjust_brightness(
+                self.model.current_image, val)
+            self.model.apply_new_current(out)
+            self.display_image()
+            self.status_text.set(f"Brightness: {val}")
+
+    def apply_contrast(self, factor):
+        if self.prepare_action():
+            out = self.processor.adjust_contrast(
+                self.model.current_image, factor)
+            self.model.apply_new_current(out)
+            self.display_image()
+            self.status_text.set(f"Contrast adjusted by {factor}")
 
     def setup_status_bar(self):
         """
