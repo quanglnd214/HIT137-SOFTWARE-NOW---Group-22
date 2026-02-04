@@ -10,6 +10,8 @@ class EditorUI:
         # These will be created in setup_gui/setup_status_bar
         self.controls = None
         self.canvas = None
+        self.brightness_slider = None
+        self.contrast_slider = None
         self.blur_slider = None
         self.status_text = None
 
@@ -79,6 +81,75 @@ class EditorUI:
             to=10,
             orient=tk.HORIZONTAL)
         self.blur_slider.pack(pady=5)
+
+        # Brightness Slider
+        tk.Label(self.controls, text="Brightness", bg="gray85").pack()
+        self.brightness_slider = tk.Scale(
+            self.controls,
+            from_=0.5,
+            to=2.0,
+            resolution=0.1,
+            orient=tk.HORIZONTAL)
+        self.brightness_slider.set(1.0)
+        self.brightness_slider.pack(pady=5)
+        tk.Button(
+            self.controls,
+            text="Apply Brightness",
+            command=lambda: self.controller.adjust_brightness(
+            self.brightness_slider.get())
+            ).pack(pady=5, fill="x")
+
+        # Contrast Slider
+        tk.Label(
+            self.controls, text="Contrast", bg="gray85").pack()
+        self.contrast_slider = tk.Scale(
+            self.controls,
+            from_=0.5,
+            to=2.0,
+            resolution=0.1,
+            orient=tk.HORIZONTAL)
+        self.contrast_slider.set(1.0)
+        self.contrast_slider.pack(pady=5)
+        tk.Button(
+            self.controls,
+            text="Apply Contrast",
+            command=lambda: self.controller.adjust_contrast(
+            self.contrast_slider.get()) 
+            ).pack(pady=5, fill="x")
+
+        # Rotate + Flip Buttons
+        tk.Button(
+            self.controls,
+            text="Rotate 90°",
+            command=self.controller.rotate_image
+            ).pack(pady=5, fill="x")
+        tk.Button(
+            self.controls,
+            text="Flip Horizontal",
+            command=self.controller.flip_horizontal
+            ).pack(pady=5, fill="x")
+        tk.Button(
+            self.controls,
+            text="Flip Vertical",
+            command=self.controller.flip_vertical
+            ).pack(pady=5, fill="x")
+
+        # Resize Buttons
+        tk.Button(
+            self.controls,
+            text="Resize 50%",
+            command=lambda: self.controller.resize_image(0.5)
+            ).pack(pady=5, fill="x")
+        tk.Button(
+            self.controls,
+            text="Resize 75%",
+            command=lambda: self.controller.resize_image(0.75)
+            ).pack(pady=5, fill="x")
+        tk.Button(
+            self.controls,
+            text="Resize 100%",
+            command=lambda: self.controller.resize_image(1.0)
+            ).pack(pady=5, fill="x")
 
         # Filter buttons
         tk.Button(
