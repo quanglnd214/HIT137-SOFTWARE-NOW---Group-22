@@ -275,60 +275,42 @@ class EditorApp:
             self.unsaved_changes = False
             self.status_text.set(
                 f"Loaded: {file_path} ({bgr.shape[1]}x{bgr.shape[0]})")
-
-    
-     def save_file(self):
-            """
-                Save the current image to the existing file path.
-
-                If the image was previously opened or saved, it will be overwritten.
-                 If no file path exists yet (new image), prompts the user with a Save As dialog.
-
-                Updates the status bar to inform the user of the save action.
-
-                Does nothing if no image is currently loaded.
-            """
-            if self.current_file_path is None:
-                self.save_as_file()
+        
+    def save_file(self):
+        if self.current_file_path is None:
+            self.save_as_file()
+        else:
+            if self.model.has_image():
+                cv2.imwrite(self.current_file_path, self.model.current_image)
+                self.unsaved_changes = False
+                self.status_text.set(f"Saved: {self.current_file_path}")
             else:
-                if self.model.has_image():
-                    cv2.imwrite(self.current_file_path, self.model.current_image)
-                    self.unsaved_changes = False
-                    self.status_text.set(f"Saved: {self.current_file_path}")
-                else:
-                    messagebox.showinfo("Info", "No image to save.")
+                messagebox.showinfo("Info", "No image to save.")
 
-     def save_as_file(self):
-            """
-                Prompt the user to choose a file name and location to save the current image.
+    def save_as_file(self):
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg"),
+                ("All files", "*.*")
+            ]
+        )
 
-                Opens a file dialog allowing the user to select file type (PNG, JPEG, or any).
-                Saves the image to the selected path and updates the app's current_file_path.
-                Updates the status bar to indicate successful saving.
+        if not file_path:
+            return
 
-                If the user cancels the dialog or no image is loaded, the method exits gracefully.
-                    """
-                 file_path = filedialog.asksaveasfilename(
-                    defaultextension=".png",
-                    filetypes=[
-                         ("PNG files", "*.png"),
-                         ("JPEG files", "*.jpg"),
-                         ("All files", "*.*")
-                                             ]
-                                                    )
+        if self.model.has_image():
+            cv2.imwrite(file_path, self.model.current_image)
+            self.current_file_path = file_path
+            self.unsaved_changes = False
+            self.status_text.set(f"Saved as: {file_path}")
+        else:
+            messagebox.showinfo("Info", "No image to save.")
+    
+     
 
-                if not file_path:
-                    return
-
-                if self.model.has_image():
-                    cv2.imwrite(file_path, self.model.current_image)
-                    self.current_file_path = file_path
-                    self.unsaved_changes = False
-                    self.status_text.set(f"Saved as: {file_path}")
-                else:
-                    messagebox.showinfo("Info", "No image to save.")
-
-
+        
     def undo_action(self):
         """
         Undo the last image operation.
@@ -420,5 +402,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = EditorApp(root)
     root.mainloop()
+
 
 
