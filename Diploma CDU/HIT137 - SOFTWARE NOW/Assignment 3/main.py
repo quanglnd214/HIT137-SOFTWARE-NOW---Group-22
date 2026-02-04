@@ -225,31 +225,29 @@ class EditorApp:
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def display_image(self, image):
-        """Display an OpenCV image on the Tkinter canvas."""
-
+        """
+        Display an OpenCV image on the Tkinter canvas at its actual size
+        without automatically stretching to the canvas.
+        """
         # Convert BGR to RGB
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # Convert to PIL image
         pil_img = Image.fromarray(rgb)
 
-        # Get canvas size
-        canvas_w = self.canvas.winfo_width()
-        canvas_h = self.canvas.winfo_height()
-
-        if canvas_w > 1 and canvas_h > 1:
-            pil_img = pil_img.resize((canvas_w, canvas_h), Image.LANCZOS)
-
         # Convert to Tk image
         self.tk_image = ImageTk.PhotoImage(pil_img)
 
-        # Clear and draw
+        # Clear canvas and draw image centered
         self.canvas.delete("all")
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
         self.canvas.create_image(
             canvas_w // 2,
             canvas_h // 2,
             anchor=tk.CENTER,
-            image=self.tk_image)
+            image=self.tk_image
+        )
 
     def open_file(self):
         """
@@ -277,22 +275,18 @@ class EditorApp:
             self.status_text.set(
                 f"Loaded: {file_path} ({bgr.shape[1]}x{bgr.shape[0]})")
 
-    # Logic stubs below allow Members 1 and 3 to implement their
-    # logic without breaking the main UI thread.
     def save_file(self):
         if self.current_file_path is None:
             self.save_as_file()
         else:
-            # self.model.save(self.current_file_path)
-            self.unsaved_changes = False
-            self.status_text.set(f"Saved: {self.current_file_path}")
+            if self.model.has_image():
+                cv2.imwrite(self.current_file_path, self.model.current_image)
+                self.unsaved_changes = False
+                self.status_text.set(f"Saved: {self.current_file_path}")
+            else:
+                messagebox.showinfo("Info", "No image to save.")
 
     def save_as_file(self):
-        """
-    Prompts the user to choose a file name and location, 
-    then updates the app state after saving the image.
-    Cancels gracefully if the user closes the dialog.
-    """
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[
@@ -305,10 +299,13 @@ class EditorApp:
         if not file_path:
             return
 
-    # Later: self.model.save(file_path)
-        self.current_file_path = file_path
-        self.unsaved_changes = False
-        self.status_text.set(f"Saved as: {file_path}")
+        if self.model.has_image():
+            cv2.imwrite(file_path, self.model.current_image)
+            self.current_file_path = file_path
+            self.unsaved_changes = False
+            self.status_text.set(f"Saved as: {file_path}")
+        else:
+            messagebox.showinfo("Info", "No image to save.")
 
     def undo_action(self):
         """
