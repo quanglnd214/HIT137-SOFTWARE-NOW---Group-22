@@ -105,6 +105,19 @@ class EditorApp:
         tk.Button(self.controls, text="Contrast (1.5x)", command=lambda: self.apply_contrast(
             1.5)).pack(pady=5, fill="x")
 
+    def prepare_action(self) -> bool:
+        """
+        Member 4 Task: Gatekeeper method to ensure an image is loaded 
+        and state is saved to history before processing.
+        """
+        if not self.model.has_image():
+            messagebox.showinfo("Info", "Please open an image first.")
+            return False
+
+        # Save to history so Undo/Redo works
+        self.history.push(self.model.current_image)
+        return True
+
     def apply_grayscale(self):
         if not self.model.has_image():
             messagebox.showinfo("Info", "Please open an image first.")
@@ -189,7 +202,6 @@ class EditorApp:
             canvas_h // 2,
             anchor=tk.CENTER,
             image=self.tk_image)
-
 
     def open_file(self):
         """
@@ -279,6 +291,7 @@ class EditorApp:
             self.status_text.set("Redo performed")
         else:
             self.status_text.set("Nothing to redo")
+
 
 if __name__ == "__main__":
     # Standard boilerplate to ensure the app only launches when
