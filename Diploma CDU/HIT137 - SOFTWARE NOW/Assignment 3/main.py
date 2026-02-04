@@ -104,6 +104,12 @@ class EditorApp:
                   command=self.apply_brightness).pack(pady=5, fill="x")
         tk.Button(self.controls, text="Contrast (1.5x)", command=lambda: self.apply_contrast(
             1.5)).pack(pady=5, fill="x")
+        # Rotate Button
+        tk.Button(
+            self.controls,
+            text="Rotate 90°",
+            command=lambda: self.apply_rotate(90)
+        ).pack(pady=5, fill="x")
 
     def prepare_action(self) -> bool:
         """
@@ -165,6 +171,14 @@ class EditorApp:
             self.model.apply_new_current(out)
             self.display_image(self.model.current_image)
             self.status_text.set(f"Contrast adjusted by {factor}")
+
+    def apply_rotate(self, angle):
+        """Controller method to handle rotation request."""
+        if self.prepare_action():
+            out = self.processor.rotate(self.model.current_image, angle)
+            self.model.apply_new_current(out)
+            self.display_image(self.model.current_image)
+            self.status_text.set(f"Applied: Rotation {angle}°")
 
     def setup_status_bar(self):
         """
