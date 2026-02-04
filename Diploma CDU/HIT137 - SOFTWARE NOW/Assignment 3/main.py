@@ -118,6 +118,14 @@ class EditorApp:
                   command=lambda: self.apply_flip("h")).pack(side=tk.LEFT, expand=True, fill="x", padx=2)
         tk.Button(flip_frame, text="Flip V",
                   command=lambda: self.apply_flip("v")).pack(side=tk.LEFT, expand=True, fill="x", padx=2)
+        # Resize Buttons
+        resize_frame = tk.Frame(self.controls, bg="gray85")
+        resize_frame.pack(pady=5, fill="x")
+
+        tk.Button(resize_frame, text="Small (50%)",
+                  command=lambda: self.apply_resize(50)).pack(side=tk.LEFT, expand=True, fill="x", padx=2)
+        tk.Button(resize_frame, text="Large (150%)",
+                  command=lambda: self.apply_resize(150)).pack(side=tk.LEFT, expand=True, fill="x", padx=2)
 
     def prepare_action(self) -> bool:
         """
@@ -196,6 +204,14 @@ class EditorApp:
             self.display_image(self.model.current_image)
             direction = "Horizontally" if mode == "h" else "Vertically"
             self.status_text.set(f"Applied: Flipped {direction}")
+
+    def apply_resize(self, percent):
+        """Controller method to handle resize request."""
+        if self.prepare_action():
+            out = self.processor.resize(self.model.current_image, percent)
+            self.model.apply_new_current(out)
+            self.display_image(self.model.current_image)
+            self.status_text.set(f"Applied: Resized to {percent}%")
 
     def setup_status_bar(self):
         """
