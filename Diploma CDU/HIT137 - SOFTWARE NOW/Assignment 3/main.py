@@ -224,31 +224,30 @@ class EditorApp:
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
 
     def display_image(self, image):
-        """Display an OpenCV image on the Tkinter canvas."""
-
+        """
+        Display an OpenCV image on the Tkinter canvas at its actual size
+        without automatically stretching to the canvas.
+        """
         # Convert BGR to RGB
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # Convert to PIL image
         pil_img = Image.fromarray(rgb)
 
-        # Get canvas size
-        canvas_w = self.canvas.winfo_width()
-        canvas_h = self.canvas.winfo_height()
-
-        if canvas_w > 1 and canvas_h > 1:
-            pil_img = pil_img.resize((canvas_w, canvas_h), Image.LANCZOS)
-
         # Convert to Tk image
         self.tk_image = ImageTk.PhotoImage(pil_img)
 
-        # Clear and draw
+        # Clear canvas and draw image centered
         self.canvas.delete("all")
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
         self.canvas.create_image(
             canvas_w // 2,
             canvas_h // 2,
             anchor=tk.CENTER,
-            image=self.tk_image)
+            image=self.tk_image
+        )
+
 
     def open_file(self):
         """
@@ -402,6 +401,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = EditorApp(root)
     root.mainloop()
+
 
 
 
