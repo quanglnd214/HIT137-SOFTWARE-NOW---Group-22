@@ -110,6 +110,14 @@ class EditorApp:
             text="Rotate 90°",
             command=lambda: self.apply_rotate(90)
         ).pack(pady=5, fill="x")
+        # Flip Buttons (Horizontal and Vertical)
+        flip_frame = tk.Frame(self.controls, bg="gray85")
+        flip_frame.pack(pady=5, fill="x")
+
+        tk.Button(flip_frame, text="Flip H",
+                  command=lambda: self.apply_flip("h")).pack(side=tk.LEFT, expand=True, fill="x", padx=2)
+        tk.Button(flip_frame, text="Flip V",
+                  command=lambda: self.apply_flip("v")).pack(side=tk.LEFT, expand=True, fill="x", padx=2)
 
     def prepare_action(self) -> bool:
         """
@@ -179,6 +187,15 @@ class EditorApp:
             self.model.apply_new_current(out)
             self.display_image(self.model.current_image)
             self.status_text.set(f"Applied: Rotation {angle}°")
+
+    def apply_flip(self, mode):
+        """Controller method to handle flip request."""
+        if self.prepare_action():
+            out = self.processor.flip(self.model.current_image, mode)
+            self.model.apply_new_current(out)
+            self.display_image(self.model.current_image)
+            direction = "Horizontally" if mode == "h" else "Vertically"
+            self.status_text.set(f"Applied: Flipped {direction}")
 
     def setup_status_bar(self):
         """
