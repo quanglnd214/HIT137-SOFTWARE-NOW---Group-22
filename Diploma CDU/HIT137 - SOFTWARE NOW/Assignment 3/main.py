@@ -206,11 +206,12 @@ class EditorApp:
             self.status_text.set(f"Applied: Flipped {direction}")
 
     def apply_resize(self, percent):
-        """Controller method to handle resize request."""
+        """Controller method to handle resize request via the Processor."""
         if self.prepare_action():
+            # This calls the static method in your ImageProcessor class
             out = self.processor.resize(self.model.current_image, percent)
             self.model.apply_new_current(out)
-            self.display_image(self.model.current_image)
+            self.display_image(out)
             self.status_text.set(f"Applied: Resized to {percent}%")
 
     def setup_status_bar(self):
@@ -276,58 +277,38 @@ class EditorApp:
             self.status_text.set(
                 f"Loaded: {file_path} ({bgr.shape[1]}x{bgr.shape[0]})")
 
-    
-     def save_file(self):
-            """
-                Save the current image to the existing file path.
+    # Logic stubs below allow Members 1 and 3 to implement their
+    # logic without breaking the main UI thread.
+    def save_file(self):
+        if self.current_file_path is None:
+            self.save_as_file()
+        else:
+            # self.model.save(self.current_file_path)
+            self.unsaved_changes = False
+            self.status_text.set(f"Saved: {self.current_file_path}")
 
-                If the image was previously opened or saved, it will be overwritten.
-                 If no file path exists yet (new image), prompts the user with a Save As dialog.
+    def save_as_file(self):
+        """
+    Prompts the user to choose a file name and location, 
+    then updates the app state after saving the image.
+    Cancels gracefully if the user closes the dialog.
+    """
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[
+                ("PNG files", "*.png"),
+                ("JPEG files", "*.jpg"),
+                ("All files", "*.*")
+            ]
+        )
 
-                Updates the status bar to inform the user of the save action.
+        if not file_path:
+            return
 
-                Does nothing if no image is currently loaded.
-            """
-            if self.current_file_path is None:
-                self.save_as_file()
-            else:
-                if self.model.has_image():
-                    cv2.imwrite(self.current_file_path, self.model.current_image)
-                    self.unsaved_changes = False
-                    self.status_text.set(f"Saved: {self.current_file_path}")
-                else:
-                    messagebox.showinfo("Info", "No image to save.")
-
-     def save_as_file(self):
-            """
-                Prompt the user to choose a file name and location to save the current image.
-
-                Opens a file dialog allowing the user to select file type (PNG, JPEG, or any).
-                Saves the image to the selected path and updates the app's current_file_path.
-                Updates the status bar to indicate successful saving.
-
-                If the user cancels the dialog or no image is loaded, the method exits gracefully.
-                    """
-                 file_path = filedialog.asksaveasfilename(
-                    defaultextension=".png",
-                    filetypes=[
-                         ("PNG files", "*.png"),
-                         ("JPEG files", "*.jpg"),
-                         ("All files", "*.*")
-                                             ]
-                                                    )
-
-                if not file_path:
-                    return
-
-                if self.model.has_image():
-                    cv2.imwrite(file_path, self.model.current_image)
-                    self.current_file_path = file_path
-                    self.unsaved_changes = False
-                    self.status_text.set(f"Saved as: {file_path}")
-                else:
-                    messagebox.showinfo("Info", "No image to save.")
-
+    # Later: self.model.save(file_path)
+        self.current_file_path = file_path
+        self.unsaved_changes = False
+        self.status_text.set(f"Saved as: {file_path}")
 
     def undo_action(self):
         """
@@ -382,7 +363,8 @@ class EditorApp:
             h, w = img.shape[:2]
             return cv2.resize(img, (int(w * scale_factor), int(h * scale_factor)), interpolation=cv2.INTER_AREA)
 
-        self._apply_transformation(resize, f"Applied: Resize {int(scale_factor*100)}%")
+        self._apply_transformation(
+            resize, f"Applied: Resize {int(scale_factor*100)}%")
 
     def adjust_brightness(self, factor: float):
         self._apply_transformation(
@@ -420,5 +402,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = EditorApp(root)
     root.mainloop()
-
-

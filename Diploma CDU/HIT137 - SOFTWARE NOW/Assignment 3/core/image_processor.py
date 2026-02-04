@@ -3,6 +3,7 @@ from __future__ import annotations
 import cv2
 import numpy as np
 
+
 class ImageProcessor:
     """Gives the app image processing functions.
 
@@ -79,9 +80,11 @@ class ImageProcessor:
     @staticmethod
     def resize(image: np.ndarray, scale: int) -> np.ndarray:
         """Resize image by scale percentage."""
+        # Ensure scale is within a reasonable range (10% to 300%)
         scale = max(10, min(scale, 300))
         height, width = image.shape[:2]
         new_w = int(width * scale / 100)
         new_h = int(height * scale / 100)
-        return cv2.resize(image, (new_w, new_h))
-
+        # Use INTER_AREA for shrinking and INTER_LINEAR for enlarging
+        interpolation = cv2.INTER_AREA if scale < 100 else cv2.INTER_LINEAR
+        return cv2.resize(image, (new_w, new_h), interpolation=interpolation)
