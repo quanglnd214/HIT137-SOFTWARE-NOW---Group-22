@@ -1,6 +1,7 @@
 import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
 
 import cv2
 
@@ -111,6 +112,7 @@ class EditorApp:
         self.history.push(self.model.current_image)
         out = self.processor.to_grayscale(self.model.current_image)
         self.model.apply_new_current(out)
+        self.display_image(self.model.current_image)
         self.status_text.set("Applied: Grayscale")
 
     def apply_blur(self):
@@ -121,6 +123,7 @@ class EditorApp:
         out = self.processor.blur(
             self.model.current_image, self.blur_slider.get())
         self.model.apply_new_current(out)
+        self.display_image(self.model.current_image)
         self.status_text.set("Applied: Blur")
 
     def apply_edge(self):
@@ -130,6 +133,7 @@ class EditorApp:
         self.history.push(self.model.current_image)
         out = self.processor.edge_detection(self.model.current_image)
         self.model.apply_new_current(out)
+        self.display_image(self.model.current_image)
         self.status_text.set("Applied: Edge")
 
     def apply_brightness(self):
@@ -138,7 +142,7 @@ class EditorApp:
             out = self.processor.adjust_brightness(
                 self.model.current_image, val)
             self.model.apply_new_current(out)
-            self.display_image()
+            self.display_image(self.model.current_image)
             self.status_text.set(f"Brightness: {val}")
 
     def apply_contrast(self, factor):
@@ -146,7 +150,7 @@ class EditorApp:
             out = self.processor.adjust_contrast(
                 self.model.current_image, factor)
             self.model.apply_new_current(out)
-            self.display_image()
+            self.display_image(self.model.current_image)
             self.status_text.set(f"Contrast adjusted by {factor}")
 
     def setup_status_bar(self):
@@ -158,6 +162,34 @@ class EditorApp:
         status_bar = tk.Label(
             self.root, textvariable=self.status_text, relief=tk.SUNKEN, anchor=tk.W)
         status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+
+    def display_image(self, image):
+        """Display an OpenCV image on the Tkinter canvas."""
+
+        # Convert BGR to RGB
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # Convert to PIL image
+        pil_img = Image.fromarray(rgb)
+
+        # Get canvas size
+        canvas_w = self.canvas.winfo_width()
+        canvas_h = self.canvas.winfo_height()
+
+        if canvas_w > 1 and canvas_h > 1:
+            pil_img = pil_img.resize((canvas_w, canvas_h), Image.LANCZOS)
+
+        # Convert to Tk image
+        self.tk_image = ImageTk.PhotoImage(pil_img)
+
+        # Clear and draw
+        self.canvas.delete("all")
+        self.canvas.create_image(
+            canvas_w // 2,
+            canvas_h // 2,
+            anchor=tk.CENTER,
+            image=self.tk_image)
+
 
     def open_file(self):
         """
@@ -178,7 +210,7 @@ class EditorApp:
 
             self.model.set_image(bgr, Path(file_path))
             self.history.clear()
-            self.history.push(self.model.current_image)
+            self.display_image(self.model.current_image)
 
             self.current_file_path = file_path
             self.unsaved_changes = False
@@ -218,9 +250,35 @@ class EditorApp:
         self.unsaved_changes = False
         self.status_text.set(f"Saved as: {file_path}")
 
-    def undo_action(self): pass
-    def redo_action(self): pass
+    def undo_action(self):
+        """
+        Undo the last image operation.
+        Calls HistoryManager to retrieve the previous image state.
 
+
+        """
+        image = self.history.undo(self.model.current_image)
+        if image is not None:
+            self.model.apply_new_current(image)
+            self.display_image(image)
+            self.status_text.set("Undo performed")
+        else:
+            self.status_text.set("Nothing to undo")
+
+    def redo_action(self):
+        """
+        Redo the last undone operation.
+        Calls HistoryManager to retrieve the next image state.
+        Updates the canvas and status bar.
+
+        """
+        image = self.history.redo(self.model.current_image)
+        if image is not None:
+            self.model.apply_new_current(image)
+            self.display_image(image)
+            self.status_text.set("Redo performed")
+        else:
+            self.status_text.set("Nothing to redo")
 
 if __name__ == "__main__":
     # Standard boilerplate to ensure the app only launches when
