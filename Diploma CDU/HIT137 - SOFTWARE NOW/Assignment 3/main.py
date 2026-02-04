@@ -324,6 +324,60 @@ class EditorApp:
         else:
             self.status_text.set("Nothing to undo")
 
+    def _apply_transformation(self, transform_func, status_msg: str):
+        """Helper to apply a transformation to the current image."""
+        if not self.model.has_image():
+            messagebox.showinfo("Info", "Please open an image first.")
+            return
+        self.history.push(self.model.current_image)
+        out = transform_func(self.model.current_image)
+        self.model.apply_new_current(out)
+        self.display_image(out)
+        self.status_text.set(status_msg)
+
+    def rotate_image(self):
+        self._apply_transformation(
+            lambda img: cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE),
+            "Applied: Rotate 90°"
+        )
+
+    def flip_horizontal(self):
+        self._apply_transformation(
+            lambda img: cv2.flip(img, 1),
+            "Applied: Flip Horizontal"
+        )
+
+    def flip_vertical(self):
+        self._apply_transformation(
+            lambda img: cv2.flip(img, 0),
+            "Applied: Flip Vertical"
+        )
+
+    def resize_image(self, scale_factor: float):
+        if scale_factor <= 0:
+            messagebox.showerror("Error", "Scale factor must be positive.")
+            return
+
+        def resize(img):
+            h, w = img.shape[:2]
+            return cv2.resize(img, (int(w * scale_factor), int(h * scale_factor)), interpolation=cv2.INTER_AREA)
+
+        self._apply_transformation(resize, f"Applied: Resize {int(scale_factor*100)}%")
+
+    def adjust_brightness(self, factor: float):
+        self._apply_transformation(
+            lambda img: cv2.convertScaleAbs(img, alpha=factor, beta=0),
+            f"Applied: Brightness x{factor}"
+        )
+
+    def adjust_contrast(self, factor: float):
+        def contrast(img):
+            img_float = img.astype('float32')
+            mean = img_float.mean()
+            return cv2.convertScaleAbs((img_float - mean) * factor + mean)
+
+        self._apply_transformation(contrast, f"Applied: Contrast x{factor}")
+
     def redo_action(self):
         """
         Redo the last undone operation.
@@ -346,3 +400,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = EditorApp(root)
     root.mainloop()
+
