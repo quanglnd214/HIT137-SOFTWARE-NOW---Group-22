@@ -94,14 +94,14 @@ class EditorApp:
         self.brightness_slider = tk.Scale(
             self.controls, from_=-100, to=100, orient=tk.HORIZONTAL)
         self.brightness_slider.pack(pady=5, fill="x", padx=10)
+        tk.Button(self.controls, text="Adjust Brightness",
+                  command=self.apply_brightness).pack(pady=5, fill="x")
         tk.Button(self.controls, text="Grayscale",
                   command=self.apply_grayscale).pack(pady=5, fill="x")
         tk.Button(self.controls, text="Blur",
                   command=self.apply_blur).pack(pady=5, fill="x")
         tk.Button(self.controls, text="Edge",
                   command=self.apply_edge).pack(pady=5, fill="x")
-        tk.Button(self.controls, text="Adjust Brightness",
-                  command=self.apply_brightness).pack(pady=5, fill="x")
         tk.Button(self.controls, text="Contrast (1.5x)", command=lambda: self.apply_contrast(
             1.5)).pack(pady=5, fill="x")
         # Rotate Button
