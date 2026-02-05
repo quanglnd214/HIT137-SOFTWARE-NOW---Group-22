@@ -276,6 +276,16 @@ class EditorApp:
                 f"Loaded: {file_path} ({bgr.shape[1]}x{bgr.shape[0]})")
 
     def save_file(self):
+        """
+        Save the current image to its existing file path.
+
+        If the image was previously opened or saved, it will be overwritten.
+        If no file path exists yet (new image), the user is prompted with a Save As dialog.
+
+        Updates the status bar to inform the user of the save action.
+
+        Does nothing if no image is currently loaded.
+        """
         if self.current_file_path is None:
             self.save_as_file()
         else:
@@ -287,6 +297,15 @@ class EditorApp:
                 messagebox.showinfo("Info", "No image to save.")
 
     def save_as_file(self):
+        """
+        Prompt the user to choose a file name and location to save the current image.
+
+        Opens a file dialog to allow selection of file type (PNG, JPEG, or any).
+        Saves the image to the chosen path and updates the app's current_file_path.
+        Updates the status bar to indicate successful saving.
+
+        Exits gracefully if the user cancels the dialog or no image is loaded.
+        """
         file_path = filedialog.asksaveasfilename(
             defaultextension=".png",
             filetypes=[
