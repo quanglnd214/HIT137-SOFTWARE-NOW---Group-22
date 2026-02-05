@@ -45,6 +45,8 @@ This application allows users to perform standard image manipulations, apply adv
 │   ├── history.py          # History stack logic (Member 1)
 │   ├── image_model.py      # Image data container (Member 1)
 │   └── image_processor.py  # OpenCV implementation (Member 4)
+├── ui/
+│   ├── ui.py
 ├── main.py                 # App Controller & UI (Member 2 & 3)
 ├── requirements.txt        # External dependencies
 └── README.md               # Project documentation
