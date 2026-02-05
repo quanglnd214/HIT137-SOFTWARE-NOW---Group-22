@@ -126,6 +126,18 @@ class EditorApp:
                   command=lambda: self.apply_resize(50)).pack(side=tk.LEFT, expand=True, fill="x", padx=2)
         tk.Button(resize_frame, text="Large (150%)",
                   command=lambda: self.apply_resize(150)).pack(side=tk.LEFT, expand=True, fill="x", padx=2)
+        # Manual Resize Control
+        manual_resize_frame = tk.Frame(self.controls, bg="gray85")
+        manual_resize_frame.pack(pady=5, fill="x", padx=10)
+
+        tk.Label(manual_resize_frame, text="Manual %:",
+                 bg="gray85").pack(side=tk.LEFT)
+        self.resize_entry = tk.Entry(manual_resize_frame, width=5)
+        self.resize_entry.insert(0, "100")  # Default value
+        self.resize_entry.pack(side=tk.LEFT, padx=5)
+
+        tk.Button(manual_resize_frame, text="Go",
+                  command=self.apply_manual_resize).pack(side=tk.LEFT, fill="x", expand=True)
 
     def prepare_action(self) -> bool:
         """
@@ -213,6 +225,23 @@ class EditorApp:
             self.model.apply_new_current(out)
             self.display_image(out)
             self.status_text.set(f"Applied: Resized to {percent}%")
+
+    def apply_manual_resize(self):
+        """Allows user to enter a custom percentage for resizing."""
+        try:
+            val = float(self.resize_entry.get())
+            if val <= 0:
+                raise ValueError
+
+            # Use the existing processor logic
+            if self.prepare_action():
+                out = self.processor.resize(self.model.current_image, val)
+                self.model.apply_new_current(out)
+                self.display_image(out)
+                self.status_text.set(f"Applied: Manual Resize to {val}%")
+        except ValueError:
+            messagebox.showerror(
+                "Error", "Please enter a valid positive number for resize percentage.")
 
     def setup_status_bar(self):
         """
